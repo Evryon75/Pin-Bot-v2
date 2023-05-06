@@ -1,3 +1,5 @@
+#![feature(async_closure)]
+
 use serenity::framework::StandardFramework;
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
@@ -7,7 +9,7 @@ mod handler;
 mod settings;
 
 const DISCORD_TOKEN: &str =
-    "MTEwNDEyMTUzMTI0OTk5MTc0MQ.GC1hcl.Zdzs1KRqZ-3KAHUZKaUDrp4U921_OKr3y6xN7c";
+    "uploading rq";
 
 #[tokio::main]
 async fn main() {

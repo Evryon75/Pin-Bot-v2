@@ -8,13 +8,13 @@ pub fn register(
     command: &mut builder::CreateApplicationCommand,
 ) -> &mut builder::CreateApplicationCommand {
     command
-        .name("archivecategory")
-        .description("Sets a category of your choice to be used as the main channel")
+        .name("archiverole")
+        .description("Sets a role of your choice to override permissions in archived channels")
         .create_option(|option| {
             option
-                .name("category")
-                .description("Select the category")
-                .kind(CommandOptionType::Channel)
+                .name("role")
+                .description("Everyone should have this role")
+                .kind(CommandOptionType::Role)
                 .required(true)
         })
 }
