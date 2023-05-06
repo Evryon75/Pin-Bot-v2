@@ -1,7 +1,4 @@
 use serenity::builder;
-use serenity::model::application::interaction::application_command::{
-    CommandDataOption, CommandDataOptionValue,
-};
 use serenity::model::prelude::command::CommandOptionType;
 
 pub fn register(

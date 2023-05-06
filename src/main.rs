@@ -9,7 +9,7 @@ mod handler;
 mod settings;
 
 const DISCORD_TOKEN: &str =
-    "uploading rq";
+    "MTEwNDEyMTUzMTI0OTk5MTc0MQ.GnK824._b-mowvaOoidTDF4j6ufH2jtQqwCfn4EYyA5Jk";
 
 #[tokio::main]
 async fn main() {

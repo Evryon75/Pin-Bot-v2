@@ -1,33 +1,30 @@
-
 use crate::commands;
 use crate::settings::Settings;
 use lazy_static::lazy_static;
 use serenity::async_trait;
 
-
 use serenity::model::application::command::Command;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
-use serenity::model::application::interaction::application_command::{CommandDataOption, CommandDataOptionValue};
+use serenity::model::application::interaction::application_command::{CommandDataOptionValue};
 use serenity::model::application::interaction::application_command::CommandDataOptionValue::{Channel, Role};
-use serenity::model::channel::{ChannelType, GuildChannel, PermissionOverwrite};
+use serenity::model::channel::{ChannelType, PermissionOverwrite};
 use serenity::model::event::ChannelPinsUpdateEvent;
 use serenity::model::gateway::Ready;
-use serenity::model::guild::Guild;
-use serenity::model::id::{ChannelId, RoleId};
+use serenity::model::id::{RoleId};
 use serenity::model::Permissions;
 use serenity::model::prelude::{Activity, PermissionOverwriteType};
-
 
 use serenity::prelude::*;
 
 lazy_static! {
     static ref SETTINGS: Mutex<Settings> = Mutex::new(Settings::new());
+    static ref NAMES: Mutex<Vec<String>> = Mutex::new(vec![]);
 }
 pub(crate) struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn channel_pins_update(&self, ctx: Context, mut pin: ChannelPinsUpdateEvent) {
+    async fn channel_pins_update(&self, ctx: Context, pin: ChannelPinsUpdateEvent) {
 
         let mut w = String::new();
         if SETTINGS.lock().await.main_channel == 0 {
@@ -51,13 +48,13 @@ impl EventHandler for Handler {
             let rol = SETTINGS.lock().await.archive_role;
 
             let cat = pin.guild_id.unwrap().channels(&ctx).await.unwrap().get(&pin.channel_id).unwrap().parent_id.unwrap();
-            let save = pin.guild_id.unwrap().create_channel(&ctx, |c| {
+            SETTINGS.lock().await.set_main_channel(pin.guild_id.unwrap().create_channel(&ctx, |c| {
                 c
                     .category(cat)
-                    .name("lmao")
+                    .name("new-channel")
                     .kind(ChannelType::Text)
                     .position(0)
-                    .topic("bro luiterally")
+                    .topic("G-Force. Experience it. The new Gillette Mach3 Turbo G-Force. Total comfort even against the grain. And a bold new look and feel. Gillette. The best a man can get.")
                     .permissions(vec![
                         PermissionOverwrite {
                             allow: Permissions::VIEW_CHANNEL,
@@ -65,9 +62,7 @@ impl EventHandler for Handler {
                             kind: PermissionOverwriteType::Role(rol),
                         }
                     ])
-            });
-            ctx.cache.
-            SETTINGS.lock().await.set_main_channel(save.await.unwrap().id);
+            }).await.unwrap().id);
             pin.channel_id.edit(&ctx, |chan| {
                 chan
                     .category(arch)
@@ -83,10 +78,10 @@ impl EventHandler for Handler {
         } else if pin.channel_id == SETTINGS.lock().await.main_channel {
             pin.channel_id.say(&ctx, format!("Pins updated! Current pins: {}", pin_len)).await.expect("asd");
         }
+        ctx.set_activity(Activity::watching(format!("Current Pins: {}", SETTINGS.lock().await.main_channel.pins(&ctx).await.unwrap().len()))).await;
     }
 
     async fn ready(&self, ctx: Context, _ready: Ready) {
-        println!("Successfully logged in!");
         ctx.set_activity(Activity::watching("nothing")).await;
         ctx.idle().await;
 
@@ -132,9 +127,8 @@ impl EventHandler for Handler {
                         .kind(InteractionResponseType::ChannelMessageWithSource)
                         .interaction_response_data(|message| message.content(result))
                 }).await.expect("asd");
-
-                ctx.set_activity(Activity::watching(String::from("Channel: ") + &*SETTINGS.lock().await.main_channel.name(&ctx).await.unwrap())).await;
                 ctx.online().await;
+                ctx.set_activity(Activity::watching(format!("Current Pins: {}", SETTINGS.lock().await.main_channel.pins(&ctx).await.unwrap().len()))).await;
             };
             let archivecategory = async || {
                 let mut result = "Successfully set the archive category";
